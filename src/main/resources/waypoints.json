@@ -1,0 +1,65 @@
+trade-id-one:
+    trade-one:
+        trades:
+            random-gem:
+                weight: 50
+                min-trades: 1
+                max-trades: 1
+                exp: 2
+                price-multiplier: 0.0
+                special-result: "lootgem_random"
+                cost-one:
+                    material: APPLE
+                    min-amount: 32
+                    max-amount: 64
+                cost-two:
+                    material: EMERALD
+                    min-amount: 1
+                    max-amount: 2
+            random-gem2:
+                weight: 50
+                min-trades: 1
+                max-trades: 1
+                exp: 2
+                price-multiplier: 0.0
+                special-result: "lootgem_random"
+                cost-one:
+                    material: APPLE
+                    min-amount: 32
+                    max-amount: 64
+                cost-two:
+                    material: EMERALD
+                    min-amount: 1
+                    max-amount: 2
+    2ndtrade:
+        trades:
+            random-gem:
+                weight: 50
+                min-trades: 1
+                max-trades: 1
+                exp: 2
+                price-multiplier: 0.0
+                special-result: "lootgem_random"
+                cost-one:
+                    material: APPLE
+                    min-amount: 32
+                    max-amount: 64
+                cost-two:
+                    material: EMERALD
+                    min-amount: 1
+                    max-amount: 2
+            random-gem2:
+                weight: 50
+                min-trades: 1
+                max-trades: 1
+                exp: 2
+                price-multiplier: 0.0
+                special-result: "lootgem_random"
+                cost-one:
+                    material: APPLE
+                    min-amount: 32
+                    max-amount: 64
+                cost-two:
+                    material: EMERALD
+                    min-amount: 1
+                    max-amount: 2
