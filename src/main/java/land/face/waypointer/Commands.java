@@ -36,6 +36,7 @@ public class Commands {
   public void reloadCommand(Player sender) {
     plugin.disable();
     plugin.enable();
+    MessageUtils.sendMessage(sender, "&aWaypointer reloaded!");
   }
 
   @Command(identifier = "waypointer create", permissions = "waypointer.create")
@@ -45,11 +46,27 @@ public class Commands {
     MessageUtils.sendMessage(sender, "done");
   }
 
+  @Command(identifier = "waypointer delete", permissions = "waypointer.delete")
+  public void openCommand(Player sender, @Arg(name = "id") String id) {
+    plugin.getWaypointManager().deleteWaypoint(id);
+    MessageUtils.sendMessage(sender, "done");
+  }
+
   @Command(identifier = "waypointer set", permissions = "waypointer.set", onlyPlayers = false)
   public void openCommand(CommandSender sender, @Arg(name = "target") Player player,
       @Arg(name = "id") String id) {
     plugin.getWaypointManager().setWaypoint(player, id);
     MessageUtils.sendMessage(sender, "done");
+  }
+
+  @Command(identifier = "waypointer list", permissions = "waypointer.list", onlyPlayers = false)
+  public void openCommand(CommandSender sender) {
+    StringBuilder list = new StringBuilder();
+    for (String s : plugin.getWaypointManager().getLoadedWaypoints().keySet()) {
+      list.append(s).append(" ");
+    }
+    MessageUtils.sendMessage(sender, "Waypoint list");
+    MessageUtils.sendMessage(sender, list.toString());
   }
 
 }
