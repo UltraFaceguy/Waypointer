@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.WeakHashMap;
+import land.face.waypointer.ReachWaypointEvent;
 import land.face.waypointer.WaypointerPlugin;
 import land.face.waypointer.data.BasicLocation;
 import land.face.waypointer.data.Waypoint;
@@ -31,7 +32,7 @@ public class WaypointManager {
   private Map<String, Waypoint> loadedWaypoints = new HashMap<>();
 
   private static String WAYPOINT_IND = ChatColor.AQUA + "✖";
-  private static String WAYPOINT_TEXT = "&b►Waypoint: {0}◄";
+  private static String WAYPOINT_TEXT = "&b► {0} ◄";
 
   private Gson gson = new Gson();
 
@@ -95,35 +96,38 @@ public class WaypointManager {
         continue;
       }
       Vector offset = waypoint.getLocation().asVector().subtract(p.getEyeLocation().toVector());
-      if (offset.length() < 4) {
+      if (offset.length() < 4.5) {
         Bukkit.getScheduler()
             .runTaskLater(WaypointerPlugin.getInstance(), () -> removeWaypoint(p), 0L);
-        MessageUtils.sendMessage(p, "&l&b[Waypoint] &bDestination reached!");
+
+        ReachWaypointEvent reachWaypointEvent = new ReachWaypointEvent(p, waypoint.getId());
+        Bukkit.getPluginManager().callEvent(reachWaypointEvent);
+
+        MessageUtils.sendMessage(p,
+            "&l&b[Waypoint] &bYou've reached &f" + waypoint.getName() + "&b!");
         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-      } else if (offset.length() < 15) {
+        return;
+      }
+      if (offset.length() < 15) {
         EntityUtil.moveHologram(indicator, waypoint.getLocation().asLocation());
         if (indicator.isMoving()) {
-          EntityUtil
-              .updateHologramName(indicator, WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
+          EntityUtil.updateHologramName(indicator,
+              WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
           indicator.setMoving(false);
         }
-      } else {
-        offset.normalize().multiply(4);
-        Location newLoc = p.getEyeLocation().clone().add(offset);
-        newLoc.add(p.getVelocity());
-        EntityUtil.moveHologram(indicator, newLoc);
-        if (MoveUtil.hasMoved(p)) {
-          if (!indicator.isMoving()) {
-            EntityUtil.updateHologramName(indicator, WAYPOINT_IND);
-            indicator.setMoving(true);
-          }
-        } else {
-          if (indicator.isMoving()) {
-            EntityUtil
-                .updateHologramName(indicator, WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
-            indicator.setMoving(false);
-          }
-        }
+        return;
+      }
+      offset.normalize().multiply(4.5);
+      Location newLoc = p.getEyeLocation().clone().add(offset);
+      newLoc.add(p.getVelocity());
+      EntityUtil.moveHologram(indicator, newLoc);
+      if (MoveUtil.hasMoved(p) && !indicator.isMoving()) {
+        EntityUtil.updateHologramName(indicator, WAYPOINT_IND);
+        indicator.setMoving(true);
+      } else if (indicator.isMoving() && !MoveUtil.hasMoved(p)) {
+        EntityUtil.updateHologramName(indicator,
+            WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
+        indicator.setMoving(false);
       }
     }
   }
@@ -138,10 +142,6 @@ public class WaypointManager {
 
   public Map<String, Waypoint> getLoadedWaypoints() {
     return loadedWaypoints;
-  }
-
-  public Map<Player, Waypoint> getPlayerWaypoints() {
-    return playerWaypoints;
   }
 
   public void saveWaypoints() {
