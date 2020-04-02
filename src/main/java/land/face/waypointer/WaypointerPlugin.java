@@ -25,6 +25,7 @@ import io.pixeloutlaw.minecraft.spigot.config.VersionedConfiguration;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedSmartYamlConfiguration;
 
 import java.io.File;
+import land.face.waypointer.listeners.MoveListener;
 import land.face.waypointer.managers.WaypointManager;
 import land.face.waypointer.tasks.WaypointTask;
 import org.bukkit.Bukkit;
@@ -62,7 +63,7 @@ public class WaypointerPlugin extends FacePlugin {
 
     waypointManager = new WaypointManager();
 
-    //Bukkit.getPluginManager().registerEvents(new VillagerInteractListener(this), this);
+    Bukkit.getPluginManager().registerEvents(new MoveListener(), this);
 
     waypointManager.loadWaypoints();
 
