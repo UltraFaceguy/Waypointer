@@ -58,7 +58,7 @@ public class WaypointManager {
     for (Player p : playerWaypoints.keySet()) {
       if (playerWaypoints.get(p) == waypoint) {
         Bukkit.getScheduler()
-            .runTaskLater(WaypointerPlugin.getInstance(), () -> removeWaypoint(p), 1L);
+            .runTaskLater(WaypointerPlugin.getInstance(), () -> removeWaypoint(p), 0L);
       }
     }
     loadedWaypoints.remove(id);
@@ -97,7 +97,7 @@ public class WaypointManager {
       Vector offset = waypoint.getLocation().asVector().subtract(p.getEyeLocation().toVector());
       if (offset.length() < 4) {
         Bukkit.getScheduler()
-            .runTaskLater(WaypointerPlugin.getInstance(), () -> removeWaypoint(p), 1L);
+            .runTaskLater(WaypointerPlugin.getInstance(), () -> removeWaypoint(p), 0L);
         MessageUtils.sendMessage(p, "&l&b[Waypoint] &bDestination reached!");
         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
       } else if (offset.length() < 15) {
