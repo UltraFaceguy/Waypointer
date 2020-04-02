@@ -1,5 +1,6 @@
 package land.face.waypointer.managers;
 
+import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
 import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonElement;
@@ -19,6 +20,7 @@ import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.Sound;
 import org.bukkit.entity.Player;
 import org.bukkit.util.Vector;
 
@@ -74,6 +76,9 @@ public class WaypointManager {
 
     WaypointIndicator indicator = EntityUtil.createHologram(player, WAYPOINT_IND);
     indicators.put(player, indicator);
+    MessageUtils
+        .sendMessage(player, "&l&b[Waypoint] &bSet waypoint to &f'" + waypoint.getName() + "'&b!");
+    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
   }
 
   public void tickWaypoints() {
@@ -90,9 +95,11 @@ public class WaypointManager {
         continue;
       }
       Vector offset = waypoint.getLocation().asVector().subtract(p.getEyeLocation().toVector());
-      if (offset.length() < 5) {
+      if (offset.length() < 4) {
         Bukkit.getScheduler()
             .runTaskLater(WaypointerPlugin.getInstance(), () -> removeWaypoint(p), 1L);
+        MessageUtils.sendMessage(p, "&l&b[Waypoint] &bDestination reached!");
+        p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
       } else if (offset.length() < 15) {
         EntityUtil.moveHologram(indicator, waypoint.getLocation().asLocation());
         if (indicator.isMoving()) {
@@ -114,7 +121,7 @@ public class WaypointManager {
           if (indicator.isMoving()) {
             EntityUtil
                 .updateHologramName(indicator, WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
-            indicator.setMoving(true);
+            indicator.setMoving(false);
           }
         }
       }
