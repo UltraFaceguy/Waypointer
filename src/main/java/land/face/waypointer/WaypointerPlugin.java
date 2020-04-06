@@ -62,7 +62,7 @@ public class WaypointerPlugin extends FacePlugin {
       getLogger().info("Updating config.yml");
     }
 
-    waypointManager = new WaypointManager();
+    waypointManager = new WaypointManager(this);
 
     Bukkit.getPluginManager().registerEvents(new MoveListener(), this);
     Bukkit.getPluginManager().registerEvents(new LeaveListener(), this);
@@ -88,6 +88,10 @@ public class WaypointerPlugin extends FacePlugin {
     }
     HandlerList.unregisterAll(this);
     Bukkit.getScheduler().cancelTasks(this);
+  }
+
+  public VersionedSmartYamlConfiguration getConfigYAML() {
+    return configYAML;
   }
 
   public WaypointManager getWaypointManager() {

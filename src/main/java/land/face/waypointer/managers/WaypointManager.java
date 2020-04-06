@@ -1,5 +1,6 @@
 package land.face.waypointer.managers;
 
+import com.tealcube.minecraft.bukkit.TextUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
 import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
@@ -7,19 +8,21 @@ import com.tealcube.minecraft.bukkit.shade.google.gson.JsonElement;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
 import land.face.waypointer.ReachWaypointEvent;
 import land.face.waypointer.WaypointerPlugin;
 import land.face.waypointer.data.BasicLocation;
+import land.face.waypointer.data.DistanceComparator;
 import land.face.waypointer.data.Waypoint;
 import land.face.waypointer.data.WaypointIndicator;
 import land.face.waypointer.util.EntityUtil;
 import land.face.waypointer.util.MoveUtil;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -27,14 +30,29 @@ import org.bukkit.util.Vector;
 
 public class WaypointManager {
 
+  private WaypointerPlugin plugin;
+
   private Map<Player, Waypoint> playerWaypoints = new WeakHashMap<>();
   private Map<Player, WaypointIndicator> indicators = new WeakHashMap<>();
   private Map<String, Waypoint> loadedWaypoints = new HashMap<>();
 
-  private static String WAYPOINT_IND = ChatColor.AQUA + "✖";
-  private static String WAYPOINT_TEXT = "&b► {0} ◄";
+  private String WAYPOINT_IND;
+  private String WAYPOINT_TEXT;
+  private double WAYPOINT_CLEAR;
+  private double WAYPOINT_SNAP;
 
+  private DistanceComparator DISTANCE_COMPARATOR = new DistanceComparator();
   private Gson gson = new Gson();
+
+  public WaypointManager(WaypointerPlugin plugin) {
+    this.plugin = plugin;
+    WAYPOINT_IND = TextUtils
+        .color(plugin.getConfigYAML().getString("waypoint-indicator", "&b✖"));
+    WAYPOINT_TEXT = TextUtils
+        .color(plugin.getConfigYAML().getString("waypoint-indicator-snapped", "&b► {0} ◄"));
+    WAYPOINT_CLEAR = plugin.getConfigYAML().getDouble("waypoint-clear-range", 4.5);
+    WAYPOINT_SNAP = plugin.getConfigYAML().getDouble("waypoint-snap-range", 13);
+  }
 
   public void createWaypoint(String id, String name, Location location) {
     name = WordUtils.capitalizeFully(name.replaceAll("-", " ").replaceAll("_", " "));
@@ -58,8 +76,7 @@ public class WaypointManager {
     }
     for (Player p : playerWaypoints.keySet()) {
       if (playerWaypoints.get(p) == waypoint) {
-        Bukkit.getScheduler()
-            .runTaskLater(WaypointerPlugin.getInstance(), () -> removeWaypoint(p), 0L);
+        Bukkit.getScheduler().runTaskLater(plugin, () -> removeWaypoint(p), 0L);
       }
     }
     loadedWaypoints.remove(id);
@@ -96,9 +113,8 @@ public class WaypointManager {
         continue;
       }
       Vector offset = waypoint.getLocation().asVector().subtract(p.getEyeLocation().toVector());
-      if (offset.length() < 4.5) {
-        Bukkit.getScheduler()
-            .runTaskLater(WaypointerPlugin.getInstance(), () -> removeWaypoint(p), 0L);
+      if (offset.length() < WAYPOINT_CLEAR) {
+        Bukkit.getScheduler().runTaskLater(plugin, () -> removeWaypoint(p), 0L);
 
         ReachWaypointEvent reachWaypointEvent = new ReachWaypointEvent(p, waypoint.getId());
         Bukkit.getPluginManager().callEvent(reachWaypointEvent);
@@ -108,7 +124,7 @@ public class WaypointManager {
         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
         return;
       }
-      if (offset.length() < 15) {
+      if (offset.length() < WAYPOINT_SNAP) {
         EntityUtil.moveHologram(indicator, waypoint.getLocation().asLocation());
         if (indicator.isMoving()) {
           EntityUtil.updateHologramName(indicator,
@@ -142,6 +158,18 @@ public class WaypointManager {
 
   public Map<String, Waypoint> getLoadedWaypoints() {
     return loadedWaypoints;
+  }
+
+  public List<Waypoint> getWaypointsByDistance(Location location) {
+    List<Waypoint> waypoints = new ArrayList<>();
+    for (Waypoint w : loadedWaypoints.values()) {
+      if (w.getLocation().getWorld().equals(location.getWorld().getName())) {
+        waypoints.add(w);
+      }
+    }
+    DISTANCE_COMPARATOR.setLoc(location);
+    waypoints.sort(DISTANCE_COMPARATOR);
+    return waypoints;
   }
 
   public void saveWaypoints() {

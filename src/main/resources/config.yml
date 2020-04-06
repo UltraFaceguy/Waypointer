@@ -1,8 +1,16 @@
-version: "1.0.1"
+version: "1.0.2"
 
-generic-lore:
-- "&8&oTrade items cane be exchanged at"
-- "&8&othe specified location. Faster"
-- "&8&odeliveries give better profits"
-- "&8&oand experience. Teleporting can"
-- "&8&odestroy trade goods!"
+# How close can you get before the waypoint auto
+# clears itself
+waypoint-clear-range: 4.5
+
+# How close can you get before the waypoint snaps
+# to its origin location
+waypoint-snap-range: 14
+
+# The style of the indicator when in motion
+waypoint-indicator: "&b✖"
+
+# The style of the indicator when still or snapped
+# to origin. {0} is replaced by waypoint name
+waypoint-indicator-snapped: "&b► {0} ◄"
