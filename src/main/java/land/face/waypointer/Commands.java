@@ -48,8 +48,12 @@ public class Commands {
 
   @Command(identifier = "waypointer delete", permissions = "waypointer.delete")
   public void openCommand(Player sender, @Arg(name = "id") String id) {
-    plugin.getWaypointManager().deleteWaypoint(id);
-    MessageUtils.sendMessage(sender, "done");
+    if (plugin.getWaypointManager().isWaypoint(id)) {
+      plugin.getWaypointManager().deleteWaypoint(id);
+      MessageUtils.sendMessage(sender, "done");
+    } else {
+      MessageUtils.sendMessage(sender, "&eWaypoint id provided is not a registered waypoint");
+    }
   }
 
   @Command(identifier = "waypointer set", permissions = "waypointer.set", onlyPlayers = false)

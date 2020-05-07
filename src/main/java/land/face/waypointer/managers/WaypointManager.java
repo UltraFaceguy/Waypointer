@@ -82,6 +82,11 @@ public class WaypointManager {
     loadedWaypoints.remove(id);
   }
 
+  public boolean isWaypoint(String id) {
+    Waypoint waypoint = loadedWaypoints.get(id);
+    return waypoint != null;
+  }
+
   public void setWaypoint(Player player, String id) {
     if (!loadedWaypoints.containsKey(id)) {
       Bukkit.getLogger().warning("Tried to set unknown waypoint " + id + " - " + player.getName());
