@@ -28,7 +28,7 @@ public class Commands {
 
   private final WaypointerPlugin plugin;
 
-  public Commands(WaypointerPlugin plugin) {
+  Commands(WaypointerPlugin plugin) {
     this.plugin = plugin;
   }
 
@@ -43,24 +43,27 @@ public class Commands {
   public void openCommand(Player sender, @Arg(name = "name") String id,
       @Arg(name = "name") String name) {
     plugin.getWaypointManager().createWaypoint(id, name, sender.getLocation());
-    MessageUtils.sendMessage(sender, "done");
+    MessageUtils.sendMessage(sender, "Created waypoint " + id);
   }
 
   @Command(identifier = "waypointer delete", permissions = "waypointer.delete")
   public void openCommand(Player sender, @Arg(name = "id") String id) {
     if (plugin.getWaypointManager().isWaypoint(id)) {
       plugin.getWaypointManager().deleteWaypoint(id);
-      MessageUtils.sendMessage(sender, "done");
+      MessageUtils.sendMessage(sender, "&eWaypoint id " + id + " deleted");
     } else {
-      MessageUtils.sendMessage(sender, "&eWaypoint id provided is not a registered waypoint");
+      MessageUtils.sendMessage(sender, "&eWaypoint id " + id + " does not exist");
     }
   }
 
   @Command(identifier = "waypointer set", permissions = "waypointer.set", onlyPlayers = false)
   public void openCommand(CommandSender sender, @Arg(name = "target") Player player,
       @Arg(name = "id") String id) {
-    plugin.getWaypointManager().setWaypoint(player, id);
-    MessageUtils.sendMessage(sender, "done");
+    if (plugin.getWaypointManager().isWaypoint(id)) {
+      plugin.getWaypointManager().setWaypoint(player, id);
+    } else {
+      MessageUtils.sendMessage(sender, "&eWaypoint id " + id + " does not exist");
+    }
   }
 
   @Command(identifier = "waypointer list", permissions = "waypointer.list", onlyPlayers = false)
@@ -71,6 +74,12 @@ public class Commands {
     }
     MessageUtils.sendMessage(sender, "Waypoint list");
     MessageUtils.sendMessage(sender, list.toString());
+  }
+
+  @Command(identifier = "waypointer clear", permissions = "waypointer.clear")
+  public void openCommand(Player sender) {
+    plugin.getWaypointManager().removeWaypoint(sender);
+    MessageUtils.sendMessage(sender, "&b&oCleared waypoint");
   }
 
 }

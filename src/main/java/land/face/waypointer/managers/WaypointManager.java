@@ -50,8 +50,8 @@ public class WaypointManager {
         .color(plugin.getConfigYAML().getString("waypoint-indicator", "&b✖"));
     WAYPOINT_TEXT = TextUtils
         .color(plugin.getConfigYAML().getString("waypoint-indicator-snapped", "&b► {0} ◄"));
-    WAYPOINT_CLEAR = plugin.getConfigYAML().getDouble("waypoint-clear-range", 4.5);
-    WAYPOINT_SNAP = plugin.getConfigYAML().getDouble("waypoint-snap-range", 13);
+    WAYPOINT_CLEAR = Math.pow(plugin.getConfigYAML().getDouble("waypoint-clear-range", 4.5), 2);
+    WAYPOINT_SNAP = Math.pow(plugin.getConfigYAML().getDouble("waypoint-snap-range", 13), 2);
   }
 
   public void createWaypoint(String id, String name, Location location) {
@@ -118,7 +118,7 @@ public class WaypointManager {
         continue;
       }
       Vector offset = waypoint.getLocation().asVector().subtract(p.getEyeLocation().toVector());
-      if (offset.length() < WAYPOINT_CLEAR) {
+      if (offset.lengthSquared() < WAYPOINT_CLEAR) {
         Bukkit.getScheduler().runTaskLater(plugin, () -> removeWaypoint(p), 0L);
 
         ReachWaypointEvent reachWaypointEvent = new ReachWaypointEvent(p, waypoint.getId());
@@ -129,7 +129,7 @@ public class WaypointManager {
         p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
         return;
       }
-      if (offset.length() < WAYPOINT_SNAP) {
+      if (offset.lengthSquared() < WAYPOINT_SNAP) {
         EntityUtil.moveHologram(indicator, waypoint.getLocation().asLocation());
         if (indicator.isMoving()) {
           EntityUtil.updateHologramName(indicator,
@@ -138,10 +138,13 @@ public class WaypointManager {
         }
         return;
       }
-      offset.normalize().multiply(4.5);
-      Location newLoc = p.getEyeLocation().clone().add(offset);
-      newLoc.add(p.getVelocity());
-      EntityUtil.moveHologram(indicator, newLoc);
+
+      offset.normalize().multiply(3.8);
+      offset.add(MoveUtil.getVelocity(p).multiply(3));
+
+      Location finalLocation = p.getEyeLocation().clone().add(offset);
+
+      EntityUtil.moveHologram(indicator, finalLocation);
       if (MoveUtil.hasMoved(p) && !indicator.isMoving()) {
         EntityUtil.updateHologramName(indicator, WAYPOINT_IND);
         indicator.setMoving(true);

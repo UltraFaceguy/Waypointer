@@ -2,9 +2,11 @@ name: Waypointer
 version: ${project.version}
 main: land.face.waypointer.WaypointerPlugin
 depend: [Facecore, HolographicDisplays]
-api-version: 1.15
+api-version: 1.16
 
 permissions:
+  waypointer.clear:
+    default: true
   waypointer.reload:
     default: false
   waypointer.set:
@@ -13,4 +15,4 @@ permissions:
 commands:
   waypointer:
     description: Waypointing and waypointer accessories
-    aliases: [waypoint, daway]
+    aliases: [waypoint, daway, wp]
