@@ -19,6 +19,8 @@
 package land.face.waypointer;
 
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
+import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import se.ranzdo.bukkit.methodcommand.Arg;
@@ -64,6 +66,28 @@ public class Commands {
     } else {
       MessageUtils.sendMessage(sender, "&eWaypoint id " + id + " does not exist");
     }
+  }
+
+  @Command(identifier = "waypointer custom", permissions = "waypointer.set", onlyPlayers = false)
+  public void customCommand(CommandSender sender, @Arg(name = "target") Player player,
+      @Arg(name = "x") double x, @Arg(name = "y") double y, @Arg(name = "z") double z,
+      @Arg(name = "world") World world, @Arg(name = "name") String name) {
+    if (world == null) {
+      MessageUtils.sendMessage(sender, "&eWorld does not exist!");
+      return;
+    }
+    plugin.getWaypointManager().setWaypoint(player, name, new Location(world, x, y, z));
+  }
+
+  @Command(identifier = "waypointer point")
+  public void pointCommand(CommandSender sender, @Arg(name = "x") double x,
+      @Arg(name = "y") double y, @Arg(name = "z") double z, @Arg(name = "world") World world,
+      @Arg(name = "name") String name) {
+    if (world == null) {
+      MessageUtils.sendMessage(sender, "&eWorld does not exist!");
+      return;
+    }
+    plugin.getWaypointManager().setWaypoint((Player) sender, name.replaceAll("_", " "), new Location(world, x, y, z));
   }
 
   @Command(identifier = "waypointer list", permissions = "waypointer.list", onlyPlayers = false)

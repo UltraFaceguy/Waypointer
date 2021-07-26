@@ -2,6 +2,7 @@ package land.face.waypointer.managers;
 
 import com.tealcube.minecraft.bukkit.TextUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
+import com.tealcube.minecraft.bukkit.facecore.utilities.MoveUtil;
 import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonElement;
@@ -20,7 +21,6 @@ import land.face.waypointer.data.DistanceComparator;
 import land.face.waypointer.data.Waypoint;
 import land.face.waypointer.data.WaypointIndicator;
 import land.face.waypointer.util.EntityUtil;
-import land.face.waypointer.util.MoveUtil;
 import org.apache.commons.lang.WordUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -30,19 +30,19 @@ import org.bukkit.util.Vector;
 
 public class WaypointManager {
 
-  private WaypointerPlugin plugin;
+  private final WaypointerPlugin plugin;
 
-  private Map<Player, Waypoint> playerWaypoints = new WeakHashMap<>();
-  private Map<Player, WaypointIndicator> indicators = new WeakHashMap<>();
-  private Map<String, Waypoint> loadedWaypoints = new HashMap<>();
+  private final Map<Player, Waypoint> playerWaypoints = new WeakHashMap<>();
+  private final Map<Player, WaypointIndicator> indicators = new WeakHashMap<>();
+  private final Map<String, Waypoint> loadedWaypoints = new HashMap<>();
 
-  private String WAYPOINT_IND;
-  private String WAYPOINT_TEXT;
-  private double WAYPOINT_CLEAR;
-  private double WAYPOINT_SNAP;
+  private final String WAYPOINT_IND;
+  private final String WAYPOINT_TEXT;
+  private final double WAYPOINT_CLEAR;
+  private final double WAYPOINT_SNAP;
 
-  private DistanceComparator DISTANCE_COMPARATOR = new DistanceComparator();
-  private Gson gson = new Gson();
+  private final DistanceComparator DISTANCE_COMPARATOR = new DistanceComparator();
+  private final Gson gson = new Gson();
 
   public WaypointManager(WaypointerPlugin plugin) {
     this.plugin = plugin;
@@ -95,6 +95,24 @@ public class WaypointManager {
     removeWaypoint(player);
 
     Waypoint waypoint = loadedWaypoints.get(id);
+    playerWaypoints.put(player, waypoint);
+
+    WaypointIndicator indicator = EntityUtil.createHologram(player, WAYPOINT_IND);
+    indicators.put(player, indicator);
+    MessageUtils
+        .sendMessage(player, "&l&b[Waypoint] &bSet waypoint to &f'" + waypoint.getName() + "'&b!");
+    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
+  }
+
+  public void setWaypoint(Player player, String customName, Location location) {
+
+    removeWaypoint(player);
+
+    Waypoint waypoint = new Waypoint();
+    waypoint.setId("CUSTOM");
+    waypoint.setLocation(BasicLocation.fromLocation(location));
+    waypoint.setName(customName);
+
     playerWaypoints.put(player, waypoint);
 
     WaypointIndicator indicator = EntityUtil.createHologram(player, WAYPOINT_IND);
