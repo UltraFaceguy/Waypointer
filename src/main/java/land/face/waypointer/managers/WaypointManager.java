@@ -1,11 +1,11 @@
 package land.face.waypointer.managers;
 
-import com.tealcube.minecraft.bukkit.TextUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MoveUtil;
 import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonElement;
+import io.pixeloutlaw.minecraft.spigot.garbage.StringExtensionsKt;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -46,10 +46,10 @@ public class WaypointManager {
 
   public WaypointManager(WaypointerPlugin plugin) {
     this.plugin = plugin;
-    WAYPOINT_IND = TextUtils
-        .color(plugin.getConfigYAML().getString("waypoint-indicator", "&b✖"));
-    WAYPOINT_TEXT = TextUtils
-        .color(plugin.getConfigYAML().getString("waypoint-indicator-snapped", "&b► {0} ◄"));
+    WAYPOINT_IND = StringExtensionsKt.chatColorize(
+        plugin.getConfigYAML().getString("waypoint-indicator", "&b✖"));
+    WAYPOINT_TEXT = StringExtensionsKt.chatColorize(
+        plugin.getConfigYAML().getString("waypoint-indicator-snapped", "&b► {0} ◄"));
     WAYPOINT_CLEAR = Math.pow(plugin.getConfigYAML().getDouble("waypoint-clear-range", 4.5), 2);
     WAYPOINT_SNAP = Math.pow(plugin.getConfigYAML().getDouble("waypoint-snap-range", 13), 2);
   }

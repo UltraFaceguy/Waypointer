@@ -21,6 +21,7 @@ package land.face.waypointer;
 import com.gmail.filoghost.holographicdisplays.api.Hologram;
 import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.tealcube.minecraft.bukkit.facecore.plugin.FacePlugin;
+import com.tealcube.minecraft.bukkit.shade.acf.PaperCommandManager;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedConfiguration;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedSmartYamlConfiguration;
 
@@ -31,7 +32,6 @@ import land.face.waypointer.tasks.WaypointTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.HandlerList;
-import se.ranzdo.bukkit.methodcommand.CommandHandler;
 
 public class WaypointerPlugin extends FacePlugin {
 
@@ -74,8 +74,11 @@ public class WaypointerPlugin extends FacePlugin {
     waypointTask = new WaypointTask();
     waypointTask.runTaskTimer(this, 1L, 1L);
 
-    CommandHandler commandHandler = new CommandHandler(this);
-    commandHandler.registerCommands(new Commands(this));
+    PaperCommandManager commandManager = new PaperCommandManager(this);
+    commandManager.registerCommand(new Commands(this));
+
+    commandManager.getCommandCompletions()
+        .registerCompletion("waypoint-ids", c -> waypointManager.getLoadedWaypoints().keySet());
   }
 
   @Override

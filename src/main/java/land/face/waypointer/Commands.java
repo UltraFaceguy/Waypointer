@@ -19,14 +19,19 @@
 package land.face.waypointer;
 
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
+import com.tealcube.minecraft.bukkit.shade.acf.BaseCommand;
+import com.tealcube.minecraft.bukkit.shade.acf.annotation.CommandAlias;
+import com.tealcube.minecraft.bukkit.shade.acf.annotation.CommandCompletion;
+import com.tealcube.minecraft.bukkit.shade.acf.annotation.CommandPermission;
+import com.tealcube.minecraft.bukkit.shade.acf.annotation.Subcommand;
+import com.tealcube.minecraft.bukkit.shade.acf.annotation.Syntax;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
-import se.ranzdo.bukkit.methodcommand.Arg;
-import se.ranzdo.bukkit.methodcommand.Command;
 
-public class Commands {
+@CommandAlias("waypointer|wp|marker")
+public class Commands extends BaseCommand {
 
   private final WaypointerPlugin plugin;
 
@@ -34,22 +39,28 @@ public class Commands {
     this.plugin = plugin;
   }
 
-  @Command(identifier = "waypointer reload", permissions = "waypointer.reload")
+  @Subcommand("reload")
+  @CommandPermission("waypointer.reload")
   public void reloadCommand(Player sender) {
     plugin.disable();
     plugin.enable();
     MessageUtils.sendMessage(sender, "&aWaypointer reloaded!");
   }
 
-  @Command(identifier = "waypointer create", permissions = "waypointer.create")
-  public void openCommand(Player sender, @Arg(name = "name") String id,
-      @Arg(name = "name") String name) {
+  @Subcommand("create")
+  @CommandCompletion("id name")
+  @Syntax("<waypoint-id> <waypoint-display-name>")
+  @CommandPermission("waypointer.create")
+  public void openCommand(Player sender, String id, String name) {
     plugin.getWaypointManager().createWaypoint(id, name, sender.getLocation());
     MessageUtils.sendMessage(sender, "Created waypoint " + id);
   }
 
-  @Command(identifier = "waypointer delete", permissions = "waypointer.delete")
-  public void openCommand(Player sender, @Arg(name = "id") String id) {
+  @Subcommand("delete")
+  @CommandCompletion("@waypoint-ids")
+  @Syntax("<waypoint-id>")
+  @CommandPermission("waypointer.delete")
+  public void openCommand(Player sender, String id) {
     if (plugin.getWaypointManager().isWaypoint(id)) {
       plugin.getWaypointManager().deleteWaypoint(id);
       MessageUtils.sendMessage(sender, "&eWaypoint id " + id + " deleted");
@@ -58,9 +69,11 @@ public class Commands {
     }
   }
 
-  @Command(identifier = "waypointer set", permissions = "waypointer.set", onlyPlayers = false)
-  public void openCommand(CommandSender sender, @Arg(name = "target") Player player,
-      @Arg(name = "id") String id) {
+  @Subcommand("set")
+  @CommandCompletion("@players @waypoint-ids")
+  @Syntax("<player> <waypoint-id>")
+  @CommandPermission("waypointer.set")
+  public void openCommand(CommandSender sender, Player player, String id) {
     if (plugin.getWaypointManager().isWaypoint(id)) {
       plugin.getWaypointManager().setWaypoint(player, id);
     } else {
@@ -68,10 +81,12 @@ public class Commands {
     }
   }
 
-  @Command(identifier = "waypointer custom", permissions = "waypointer.set", onlyPlayers = false)
-  public void customCommand(CommandSender sender, @Arg(name = "target") Player player,
-      @Arg(name = "x") double x, @Arg(name = "y") double y, @Arg(name = "z") double z,
-      @Arg(name = "world") World world, @Arg(name = "name") String name) {
+  @Subcommand("custom")
+  @CommandCompletion("@players @range:1-100 @range:1-100 @range:1-100 @worlds text")
+  @Syntax("<player> <x> <y> <z> <world> <name>")
+  @CommandPermission("waypointer.custom")
+  public void customCommand(CommandSender sender, Player player, double x, double y, double z,
+      World world, String name) {
     if (world == null) {
       MessageUtils.sendMessage(sender, "&eWorld does not exist!");
       return;
@@ -79,10 +94,11 @@ public class Commands {
     plugin.getWaypointManager().setWaypoint(player, name, new Location(world, x, y, z));
   }
 
-  @Command(identifier = "waypointer point")
-  public void pointCommand(CommandSender sender, @Arg(name = "x") double x,
-      @Arg(name = "y") double y, @Arg(name = "z") double z, @Arg(name = "world") World world,
-      @Arg(name = "name") String name) {
+  @Subcommand("point")
+  @CommandCompletion("@range:1-100 @range:1-100 @range:1-100 @worlds text")
+  @Syntax("<x> <y> <z> <world> <name>")
+  public void pointCommand(CommandSender sender, double x, double y, double z, World world,
+      String name) {
     if (world == null) {
       MessageUtils.sendMessage(sender, "&eWorld does not exist!");
       return;
@@ -90,7 +106,8 @@ public class Commands {
     plugin.getWaypointManager().setWaypoint((Player) sender, name.replaceAll("_", " "), new Location(world, x, y, z));
   }
 
-  @Command(identifier = "waypointer list", permissions = "waypointer.list", onlyPlayers = false)
+  @Subcommand("list")
+  @CommandPermission("waypointer.list")
   public void openCommand(CommandSender sender) {
     StringBuilder list = new StringBuilder();
     for (String s : plugin.getWaypointManager().getLoadedWaypoints().keySet()) {
@@ -100,7 +117,7 @@ public class Commands {
     MessageUtils.sendMessage(sender, list.toString());
   }
 
-  @Command(identifier = "waypointer clear", permissions = "waypointer.clear")
+  @Subcommand("clear|delete|remove")
   public void openCommand(Player sender) {
     plugin.getWaypointManager().removeWaypoint(sender);
     MessageUtils.sendMessage(sender, "&b&oCleared waypoint");
