@@ -18,10 +18,9 @@
  */
 package land.face.waypointer;
 
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
-import com.gmail.filoghost.holographicdisplays.api.HologramsAPI;
 import com.tealcube.minecraft.bukkit.facecore.plugin.FacePlugin;
 import com.tealcube.minecraft.bukkit.shade.acf.PaperCommandManager;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedConfiguration;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedSmartYamlConfiguration;
 
@@ -53,11 +52,6 @@ public class WaypointerPlugin extends FacePlugin {
   @Override
   public void enable() {
     instance = this;
-
-    for (Hologram hologram : HologramsAPI.getHolograms(this)) {
-      hologram.delete();
-    }
-
     configYAML = new VersionedSmartYamlConfiguration(new File(getDataFolder(), "config.yml"),
         getResource("config.yml"),
         VersionedConfiguration.VersionUpdateType.BACKUP_AND_UPDATE);
@@ -88,9 +82,7 @@ public class WaypointerPlugin extends FacePlugin {
       waypointManager.removeWaypoint(p);
     }
     waypointManager.saveWaypoints();
-    for (Hologram hologram : HologramsAPI.getHolograms(this)) {
-      hologram.delete();
-    }
+    waypointManager.deleteIndicators();
     HandlerList.unregisterAll(this);
     Bukkit.getScheduler().cancelTasks(this);
   }

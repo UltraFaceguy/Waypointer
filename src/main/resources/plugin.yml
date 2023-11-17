@@ -1,7 +1,7 @@
 name: Waypointer
 version: ${project.version}
 main: land.face.waypointer.WaypointerPlugin
-depend: [Facecore, HolographicDisplays]
+depend: [Facecore, DecentHolograms]
 api-version: 1.16
 
 permissions:

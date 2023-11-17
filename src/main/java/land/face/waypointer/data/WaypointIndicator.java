@@ -1,6 +1,6 @@
 package land.face.waypointer.data;
 
-import com.gmail.filoghost.holographicdisplays.api.Hologram;
+import eu.decentsoftware.holograms.api.holograms.Hologram;
 
 public class WaypointIndicator {
 

@@ -2,6 +2,7 @@ package land.face.waypointer.managers;
 
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MoveUtil;
+import com.tealcube.minecraft.bukkit.facecore.utilities.PaletteUtil;
 import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonElement;
@@ -46,12 +47,14 @@ public class WaypointManager {
 
   public WaypointManager(WaypointerPlugin plugin) {
     this.plugin = plugin;
-    WAYPOINT_IND = StringExtensionsKt.chatColorize(
-        plugin.getConfigYAML().getString("waypoint-indicator", "&b✖"));
-    WAYPOINT_TEXT = StringExtensionsKt.chatColorize(
-        plugin.getConfigYAML().getString("waypoint-indicator-snapped", "&b► {0} ◄"));
+    WAYPOINT_IND = PaletteUtil.color(plugin.getConfigYAML().getString("waypoint-indicator", "&b✖"));
+    WAYPOINT_TEXT = PaletteUtil.color(plugin.getConfigYAML().getString("waypoint-indicator-snapped", "&b► {0} ◄"));
     WAYPOINT_CLEAR = Math.pow(plugin.getConfigYAML().getDouble("waypoint-clear-range", 4.5), 2);
     WAYPOINT_SNAP = Math.pow(plugin.getConfigYAML().getDouble("waypoint-snap-range", 13), 2);
+  }
+
+  public Waypoint getWaypoint(Player player) {
+    return playerWaypoints.get(player);
   }
 
   public void createWaypoint(String id, String name, Location location) {
@@ -101,7 +104,7 @@ public class WaypointManager {
     indicators.put(player, indicator);
     MessageUtils
         .sendMessage(player, "&l&b[Waypoint] &bSet waypoint to &f'" + waypoint.getName() + "'&b!");
-    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
+    player.playSound(player.getLocation(), Sound.ENTITY_GLOW_ITEM_FRAME_ADD_ITEM, 1f, 1f);
   }
 
   public void setWaypoint(Player player, String customName, Location location) {
@@ -119,7 +122,7 @@ public class WaypointManager {
     indicators.put(player, indicator);
     MessageUtils
         .sendMessage(player, "&l&b[Waypoint] &bSet waypoint to &f'" + waypoint.getName() + "'&b!");
-    player.playSound(player.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
+    player.playSound(player.getLocation(), Sound.ENTITY_GLOW_ITEM_FRAME_ADD_ITEM, 1f, 1f);
   }
 
   public void tickWaypoints() {
@@ -144,8 +147,8 @@ public class WaypointManager {
 
         MessageUtils.sendMessage(p,
             "&l&b[Waypoint] &bYou've reached &f" + waypoint.getName() + "&b!");
-        p.playSound(p.getLocation(), Sound.ENTITY_EXPERIENCE_ORB_PICKUP, 1f, 1f);
-        return;
+        p.playSound(p.getLocation(), Sound.ENTITY_GLOW_ITEM_FRAME_REMOVE_ITEM, 1f, 1f);
+        continue;
       }
       if (offset.lengthSquared() < WAYPOINT_SNAP) {
         EntityUtil.moveHologram(indicator, waypoint.getLocation().asLocation());
@@ -154,7 +157,7 @@ public class WaypointManager {
               WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
           indicator.setMoving(false);
         }
-        return;
+        continue;
       }
 
       offset.normalize().multiply(3.8);
@@ -166,7 +169,7 @@ public class WaypointManager {
       if (MoveUtil.hasMoved(p) && !indicator.isMoving()) {
         EntityUtil.updateHologramName(indicator, WAYPOINT_IND);
         indicator.setMoving(true);
-      } else if (indicator.isMoving() && !MoveUtil.hasMoved(p)) {
+      } else if (indicator.isMoving() && !MoveUtil.hasMoved(p, 500)) {
         EntityUtil.updateHologramName(indicator,
             WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
         indicator.setMoving(false);
@@ -180,6 +183,14 @@ public class WaypointManager {
       EntityUtil.deleteHologram(indicators.get(player));
       indicators.remove(player);
     }
+  }
+
+  public void deleteIndicators() {
+    for (WaypointIndicator ind : indicators.values()) {
+      ind.getHologram().destroy();
+    }
+    indicators.clear();
+    playerWaypoints.clear();
   }
 
   public Map<String, Waypoint> getLoadedWaypoints() {

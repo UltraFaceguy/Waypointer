@@ -25,6 +25,7 @@ import com.tealcube.minecraft.bukkit.shade.acf.annotation.CommandCompletion;
 import com.tealcube.minecraft.bukkit.shade.acf.annotation.CommandPermission;
 import com.tealcube.minecraft.bukkit.shade.acf.annotation.Subcommand;
 import com.tealcube.minecraft.bukkit.shade.acf.annotation.Syntax;
+import com.tealcube.minecraft.bukkit.shade.acf.bukkit.contexts.OnlinePlayer;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -73,9 +74,9 @@ public class Commands extends BaseCommand {
   @CommandCompletion("@players @waypoint-ids")
   @Syntax("<player> <waypoint-id>")
   @CommandPermission("waypointer.set")
-  public void openCommand(CommandSender sender, Player player, String id) {
+  public void openCommand(CommandSender sender, OnlinePlayer player, String id) {
     if (plugin.getWaypointManager().isWaypoint(id)) {
-      plugin.getWaypointManager().setWaypoint(player, id);
+      plugin.getWaypointManager().setWaypoint(player.player, id);
     } else {
       MessageUtils.sendMessage(sender, "&eWaypoint id " + id + " does not exist");
     }
@@ -85,13 +86,13 @@ public class Commands extends BaseCommand {
   @CommandCompletion("@players @range:1-100 @range:1-100 @range:1-100 @worlds text")
   @Syntax("<player> <x> <y> <z> <world> <name>")
   @CommandPermission("waypointer.custom")
-  public void customCommand(CommandSender sender, Player player, double x, double y, double z,
+  public void customCommand(CommandSender sender, OnlinePlayer player, double x, double y, double z,
       World world, String name) {
     if (world == null) {
       MessageUtils.sendMessage(sender, "&eWorld does not exist!");
       return;
     }
-    plugin.getWaypointManager().setWaypoint(player, name, new Location(world, x, y, z));
+    plugin.getWaypointManager().setWaypoint(player.player, name, new Location(world, x, y, z));
   }
 
   @Subcommand("point")
