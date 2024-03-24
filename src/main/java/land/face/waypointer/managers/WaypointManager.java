@@ -3,10 +3,10 @@ package land.face.waypointer.managers;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MessageUtils;
 import com.tealcube.minecraft.bukkit.facecore.utilities.MoveUtil;
 import com.tealcube.minecraft.bukkit.facecore.utilities.PaletteUtil;
+import com.tealcube.minecraft.bukkit.shade.apache.commons.lang.WordUtils;
 import com.tealcube.minecraft.bukkit.shade.google.gson.Gson;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonArray;
 import com.tealcube.minecraft.bukkit.shade.google.gson.JsonElement;
-import io.pixeloutlaw.minecraft.spigot.garbage.StringExtensionsKt;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -22,7 +22,8 @@ import land.face.waypointer.data.DistanceComparator;
 import land.face.waypointer.data.Waypoint;
 import land.face.waypointer.data.WaypointIndicator;
 import land.face.waypointer.util.EntityUtil;
-import org.apache.commons.lang.WordUtils;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Sound;
@@ -47,8 +48,10 @@ public class WaypointManager {
 
   public WaypointManager(WaypointerPlugin plugin) {
     this.plugin = plugin;
-    WAYPOINT_IND = PaletteUtil.color(plugin.getConfigYAML().getString("waypoint-indicator", "&b✖"));
-    WAYPOINT_TEXT = PaletteUtil.color(plugin.getConfigYAML().getString("waypoint-indicator-snapped", "&b► {0} ◄"));
+    WAYPOINT_IND = MiniMessage.miniMessage().serialize(LegacyComponentSerializer.legacySection().deserialize(
+        plugin.getConfigYAML().getString("waypoint-indicator", "&b✖")));
+    WAYPOINT_TEXT = MiniMessage.miniMessage().serialize(LegacyComponentSerializer.legacySection().deserialize(
+        PaletteUtil.color(plugin.getConfigYAML().getString("waypoint-indicator-snapped", "&b► {0} ◄"))));
     WAYPOINT_CLEAR = Math.pow(plugin.getConfigYAML().getDouble("waypoint-clear-range", 4.5), 2);
     WAYPOINT_SNAP = Math.pow(plugin.getConfigYAML().getDouble("waypoint-snap-range", 13), 2);
   }
@@ -153,8 +156,8 @@ public class WaypointManager {
       if (offset.lengthSquared() < WAYPOINT_SNAP) {
         EntityUtil.moveHologram(indicator, waypoint.getLocation().asLocation());
         if (indicator.isMoving()) {
-          EntityUtil.updateHologramName(indicator,
-              WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
+          indicator.getHologram().getData().setTextHasShadow(true);
+          EntityUtil.updateHologramName(indicator, WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
           indicator.setMoving(false);
         }
         continue;
@@ -167,11 +170,12 @@ public class WaypointManager {
 
       EntityUtil.moveHologram(indicator, finalLocation);
       if (MoveUtil.hasMoved(p) && !indicator.isMoving()) {
+        indicator.getHologram().getData().setTextHasShadow(false);
         EntityUtil.updateHologramName(indicator, WAYPOINT_IND);
         indicator.setMoving(true);
       } else if (indicator.isMoving() && !MoveUtil.hasMoved(p, 500)) {
-        EntityUtil.updateHologramName(indicator,
-            WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
+        indicator.getHologram().getData().setTextHasShadow(true);
+        EntityUtil.updateHologramName(indicator, WAYPOINT_TEXT.replace("{0}", waypoint.getName()));
         indicator.setMoving(false);
       }
     }
@@ -186,8 +190,10 @@ public class WaypointManager {
   }
 
   public void deleteIndicators() {
+    var onlinePlayers = Bukkit.getOnlinePlayers();
     for (WaypointIndicator ind : indicators.values()) {
-      ind.getHologram().destroy();
+      ind.getHologram().hideHologram(onlinePlayers);
+      ind.getHologram().deleteHologram();
     }
     indicators.clear();
     playerWaypoints.clear();

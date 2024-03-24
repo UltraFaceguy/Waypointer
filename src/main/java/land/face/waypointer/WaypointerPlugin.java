@@ -20,7 +20,6 @@ package land.face.waypointer;
 
 import com.tealcube.minecraft.bukkit.facecore.plugin.FacePlugin;
 import com.tealcube.minecraft.bukkit.shade.acf.PaperCommandManager;
-import eu.decentsoftware.holograms.api.holograms.Hologram;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedConfiguration;
 import io.pixeloutlaw.minecraft.spigot.config.VersionedSmartYamlConfiguration;
 
